@@ -59,6 +59,7 @@ def start_instances(project):
         i.start()
     return
 
+#terminate the filtered instances
 @instances.command('terminate')
 @click.option('--project',default=None,
     help="terminate the instance of project (tag:<project name>)")
@@ -68,6 +69,30 @@ def start_instances(project):
     for i in instances:
         print("terminating instance {0}".format(i.id))
         i.terminate(False)
+    return
+
+#lanuch specified count of instances
+@instances.command('launch')
+@click.option('--min',default=1,
+    help="the minimum instances you want to launch")
+@click.option('--max',default=5,
+    help="the maximum instances you want to launch")
+
+def launch_instances(min,max):
+    "launch ec2 instances"
+
+    instances = ec2.create_instances(
+        MaxCount = max,
+        MinCount = min,
+        SubnetId = 'subnet-241a366e',
+        LaunchTemplate = {
+            'LaunchTemplateId':'lt-0c5a087717163cdaa',
+            'Version':'$Latest'
+        }
+    )
+
+    for i in instances:
+        print("Launching instance {0}".format(i.id))
     return
 
 if __name__ == "__main__":
