@@ -59,5 +59,16 @@ def start_instances(project):
         i.start()
     return
 
+@instances.command('terminate')
+@click.option('--project',default=None,
+    help="terminate the instance of project (tag:<project name>)")
+def start_instances(project):
+    "terminate ec2 instances"
+    instances = filter_instances(project)
+    for i in instances:
+        print("terminating instance {0}".format(i.id))
+        i.terminate(False)
+    return
+
 if __name__ == "__main__":
     instances()
