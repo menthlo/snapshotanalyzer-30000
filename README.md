@@ -2,5 +2,9 @@
 demo project to manage all EC2 snapshots
 
 
-# use
-'pipenv run python shotty/shotty.py'
+# using
+'pipenv run python shotty/shotty.py <command> <--project=PROJECT>'
+
+<command> could be list start and stopping
+
+<--project > is optional
