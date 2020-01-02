@@ -26,14 +26,16 @@ def list_instances(project):
     "list ec2 instances"
     instances = filter_instances(project)
     for i in instances:
+        #put the tags of the instance into a dict
         tags = {t['Key']:t['Value'] for t in i.tags or []}
-        print(', '.join((
-            i.id,
-            i.instance_type,
-            i.placement['AvailabilityZone'],
-            i.state['Name'],
-            i.public_dns_name,
-            tags.get('Project','<no project>'))))
+        if i.state['Code'] == 16 or i.state['Code'] == 80:
+            print(', '.join((
+                i.id,
+                i.instance_type,
+                i.placement['AvailabilityZone'],
+                i.state['Name'],
+                str(i.private_ip_address),
+                tags.get('Project','<no project>'))))
     return
 #stop the filtered instances
 @instances.command('stop')
