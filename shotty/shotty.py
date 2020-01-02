@@ -28,7 +28,7 @@ def list_instances(project):
     for i in instances:
         #put the tags of the instance into a dict
         tags = {t['Key']:t['Value'] for t in i.tags or []}
-        if i.state['Code'] == 16 or i.state['Code'] == 80:
+        if i.state['Code'] != 48:
             print(', '.join((
                 i.id,
                 i.instance_type,
