@@ -1,4 +1,5 @@
 import boto3
+import botocore
 import click
 
 session = boto3.Session(profile_name='shotty')
@@ -45,8 +46,10 @@ def snapshots():
 @snapshots.command('list')
 @click.option('--project',default=None,
     help="only snapshots of project (tag:<project>)")
+@click.option('--all','list_all',default=False,is_flag=True,
+    help="list all the snapshots not recent ")
 # list the instance with filter
-def list_snapshots(project):
+def list_snapshots(project,list_all):
     "list ec2 snapshots"
     instances = filter_instances(project)
 
@@ -61,6 +64,7 @@ def list_snapshots(project):
                     s.progress,
                     s.start_time.strftime('%c')
                 )))
+                if s.state == 'completed' and not list_all:break
     return
 
 
@@ -111,7 +115,11 @@ def stop_instances(project):
     instances = filter_instances(project)
     for i in instances:
         print("stopping instance {0}".format(i.id))
-        i.stop()
+        try:
+            i.stop()
+        except botocore.exceptions.ClientError as e:
+            print('cloud not stop instance {0}. '.format(i.id)+ str(e))
+            continue
     return
 
 #start the filtered instances
@@ -122,8 +130,13 @@ def start_instances(project):
     "star ec2 instances"
     instances = filter_instances(project)
     for i in instances:
-        print("starting instance {0}".format(i.id))
-        i.start()
+        print("starting instance {0}. ".format(i.id))
+        try:
+            i.start()
+        except botocore.exceptions.ClientError as e:
+            print('cloud not start instance {0}. '.format(i.id)+ str(e))
+            continue
+
     return
 
 #terminate the filtered instances
