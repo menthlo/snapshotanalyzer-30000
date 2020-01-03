@@ -25,6 +25,12 @@ def remove_snapshot(id):
     client = boto3.client('ec2')
     print('deleting the snapshot {0}'.format(id))
     client.delete_snapshot(SnapshotId=id)
+# if the snapshot in progressing
+def has_snapshot_pending(volume):
+    snapshots = list(volume.snapshots.all())
+    print(snapshots)
+    return snapshots and snapshots[0].state == 'pending'
+
 
 @click.group('cli')
 def cli():
@@ -193,18 +199,24 @@ def create_snapshots(project):
     instances = filter_instances(project)
 
     for i in instances:
+        '''
         print('stopping instance...{0}'.format(i.id))
         i.stop()
         i.wait_until_stopped()
+        '''
         for v in i.volumes.all():
+            if has_snapshot_pending(v):
+                print(' Skipping the volume of {0}'.format(v.id))
+                continue
             print(' Creating snapshots...{0}'.format(v.id))
             v.create_snapshot(Description='snapshots created from analyzer 30000')
-
+        '''
         print('starting instance...{0}'.format(i.id))
         i.start()
         i.wait_until_running()
 
         print('Job Done!')
+        '''
     return
 
 
