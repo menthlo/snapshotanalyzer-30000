@@ -12,9 +12,11 @@ def filter_instances(project):
             {'Name':'tag:Project','Values':[project]},
             {'Name':'instance-state-code','Values':['0','16','32','64','80']}
         ]
-        instances = ec2.instances.filter(Filters=filters)
     else:
-        instances = ec2.instances.all()
+        filters = [
+            {'Name':'instance-state-code','Values':['0','16','32','64','80']}
+        ]
+    instances = ec2.instances.filter(Filters=filters)
     return instances
 
 # function of removal of a specified snapshot
@@ -178,9 +180,18 @@ def create_snapshots(project):
     instances = filter_instances(project)
 
     for i in instances:
+        print('stopping instance...{0}'.format(i.id))
+        i.stop()
+        i.wait_until_stopped()
         for v in i.volumes.all():
+            print(' Creating snapshots...{0}'.format(v.id))
             v.create_snapshot(Description='snapshots created from analyzer 30000')
 
+        print('starting instance...{0}'.format(i.id))
+        i.start()
+        i.wait_until_running()
+
+        print('Job Done!')
     return
 
 
